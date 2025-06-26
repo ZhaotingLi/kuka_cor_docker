@@ -1,0 +1,91 @@
+############### !!! IMPORTANT !!! #####################
+robot name should be correct!! 7 or 14
+
+### ros master
+
+source /catkin_ros1_ws/devel/setup.bash 
+export ROS_MASTER_URI=http://192.180.1.5:30202 
+export ROS_IP=192.180.1.15
+
+ 
+### Run KUKA python controller
+roslaunch cor_tud_controllers bringup_remote.launch model:=7 # for lab computer
+roslaunch cor_tud_controllers bringup_local.launch model:=14 # for your pc
+
+python3 /catkin_ros1_ws/src/iiwa-ros-imitation-learning/cor_tud_controllers/python/spacenav_control.py iiwa14 
+python3 /catkin_ros1_ws/src/iiwa-ros-imitation-learning/cor_tud_controllers/python/spacenav_control_position.py iiwa14 
+python3 /catkin_ros1_ws/src/iiwa-ros-imitation-learning/cor_tud_controllers/python/request_joint_position.py iiwa14
+
+## For the cartesian controller,First run the request_joint_posotion.py to make the end-effector at the same pose 
+
+### Docker run ros
+sudo docker run -it --net=host --env="NVIDIA_DRIVER_CAPABILITIES=all" --env="DISPLAY" --env="QT_X11_NO_MITSHM=1" --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" --device=/dev/input/event21 --device=/dev/input/js0 --device=/dev/ttyUSB0  kuka_robot_refactor:v1 bash 
+
+sudo docker run -it --net=host --env="NVIDIA_DRIVER_CAPABILITIES=all" --env="DISPLAY" --env="QT_X11_NO_MITSHM=1" --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw"  --device=/dev/ttyUSB0  kuka_robot_refactor:v1 bash 
+
+sudo docker run -it --net=host --env="NVIDIA_DRIVER_CAPABILITIES=all" --env="DISPLAY" --env="QT_X11_NO_MITSHM=1" --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" --device=/dev/input/event21 --device=/dev/input/js0 kuka_robot_refactor:v1 bash 
+
+python main-kuka-6dEE_softH.py
+
+### Docker build ros 
+cd /home/zhaoting/ros_docker_packages/kuka_iiwa_ros
+sudo docker build -t kuka_robot_refactor:v1 -f dockerfile_kuka_cor_dependencies .
+
+sudo docker build -t kuka_robot:v1 -f dockerfile_kuka_cor_dependencies .  # old, base of BD-COACH image
+
+
+#### Docker build BD-COACH 
+cd /home/zhaoting/TUD_Projects/BD-COACH/Files
+sudo docker build -t bd-coach-image -f dockerfile_bd_coach .
+
+
+### Docker run BD-COACH
+xhost +local:docker
+sudo docker run -it --net=host --env="NVIDIA_DRIVER_CAPABILITIES=all" --env="DISPLAY" --env="QT_X11_NO_MITSHM=1" --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" --device=/dev/input/event21 --device=/dev/input/js0 bd-coach-image bash 
+
+python main-kuka.py --config-file kuka_low-dim_HGDagger
+
+### Docker run BD-COACH with GPU
+sudo docker run -it --gpus=all --net=host --env="NVIDIA_DRIVER_CAPABILITIES=all" --env="DISPLAY" --env="QT_X11_NO_MITSHM=1" --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" --device=/dev/input/event8 --device=/dev/input/js0 bd-coach-image bash 
+
+### launch real robot 
+roslaunch cor_tud_controllers bringup.launch robot_name:=iiwa model:=7 controller:=TorqueController # old
+
+
+### launch simulation
+xhost + local:docker
+roslaunch cor_tud_controllers simulation_bringup.launch robot_name:=iiwa model:=7 controller:=TorqueController # old
+roslaunch cor_tud_controllers bringup_remote.launch model:=14 simulation:=true 
+
+### space mouse
+ls -l /dev/input/by-id/
+sudo lsof /dev/input/event23
+ spacenavd -v -d &
+ roslaunch spacenav_node classic.launch
+ 
+### qb hand 
+For docker to access it: --device=/dev/ttyUSB0 
+roslaunch qb_hand_control control_qbhand.launch standalone:=true activate_on_initialization:=true 
+ 
+### Copy files from docker into local
+sudo docker ps
+sudo docker cp cdb38dda8c08:app/saved_data/kuka-push-BD-COACH-1027-1505  /home/zhaoting/Documents 
+
+sudo docker cp b870b092a521:/catkin_ros1_ws/src/relaxed_ik_ros1/relaxed_ik_core/saved_data/ /home/zhaoting/Documents/kuka_box_0411
+sudo docker cp b870b092a521:/catkin_ros1_ws/src/relaxed_ik_ros1/relaxed_ik_core/results/ /home/zhaoting/Documents/results
+
+### Delete non-used docker images
+sudo docker container prune 
+sudo docker images -a | grep none | awk '{ print $3; }' | sudo xargs docker rmi –force
+
+sudo docker system df    # check the docker memory usage
+ sudo docker builder prune # remove unused cache
+
+#### Things/ Parameters need to be changed if the desk positions changes:
+spacenav_control
+1. x&y limits of end effecotr
+2. Goal of the orientation 
+jonit_position_control
+goal_joint_position
+
+goal_object_position

@@ -1,0 +1,151 @@
+# Base image
+FROM turtlebot3_base:latest
+# FROM nvidia_ros:latest
+
+# Maintainer info (optional but recommended)
+LABEL maintainer="zhaoting@Alienware"
+
+# Set up ROS environment (may be required for some ROS-based packages)
+RUN source /opt/ros/noetic/setup.bash
+
+# Copy all the dependencies into the container
+COPY ./kuka_cor_dependencies /kuka_cor_dependencies
+
+# Build and install kuka_fri
+WORKDIR /kuka_cor_dependencies/kuka_fri
+RUN ./waf configure && \
+    ./waf && \
+    ./waf install
+
+# Build and install SpaceVecAlg
+WORKDIR /kuka_cor_dependencies/SpaceVecAlg
+RUN mkdir build && cd build && \
+    cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_SIMD=ON -DPYTHON_BINDING=OFF .. && \
+    make -j && \
+    make install
+
+# Build and install RBDyn
+WORKDIR /kuka_cor_dependencies/RBDyn
+RUN mkdir build && cd build && \
+    cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_SIMD=ON -DPYTHON_BINDING=OFF .. && \
+    make -j && \
+    make install
+
+# Build and install mc_rbdyn_urdf
+WORKDIR /kuka_cor_dependencies/mc_rbdyn_urdf
+RUN mkdir build && cd build && \
+    cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_SIMD=ON -DPYTHON_BINDING=OFF .. && \
+    make -j && \
+    make install
+
+# Build and install corrade
+WORKDIR /kuka_cor_dependencies/corrade
+RUN mkdir build && cd build && \
+    cmake .. && \
+    make -j && \
+    make install
+
+# Build and install robot_controllers
+WORKDIR /kuka_cor_dependencies/robot_controllers
+RUN mkdir build && cd build && \
+    cmake .. && \
+    make -j && \
+    make install
+
+
+WORKDIR /kuka_cor_dependencies/robotics-toolbox-python
+RUN pip3 install -e. 
+RUN mkdir -p $(python -m site --user-site)/rtbdata/xacro/iiwa_description && \
+    ln -s /path/to/your/iiwa_description/meshes $(python -m site --user-site)/rtbdata/xacro/iiwa_description/meshes
+
+RUN apt-get update  && apt-get install -y \
+    ros-noetic-joint-trajectory-controller \
+    ros-noetic-ros-controllers \
+    ros-noetic-ros-control \
+    ros-noetic-moveit-simple-controller-manager 
+    
+RUN apt-get update  && apt-get install -y \
+    libgl1-mesa-glx \
+    libgl1-mesa-dri 
+
+RUN pip install roboticstoolbox-python
+RUN pip install "numpy>=1.20.0"
+
+RUN apt-get update && apt-get install -y ros-noetic-trac-ik
+
+# Clone the spacenavd repository
+RUN git clone https://github.com/FreeSpacenav/spacenavd.git /spacenavd
+
+# Set the working directory
+WORKDIR /spacenavd
+
+# Build and install spacenavd
+RUN ./configure && make && make install
+
+RUN apt-get update && apt-get install -y \
+    ros-noetic-spacenav-node
+
+# optitrack    
+RUN apt-get update && apt-get install -y ros-noetic-vrpn-client-ros
+
+# qbhand dempendencies
+RUN apt-get update && apt-get install -y \
+    ros-noetic-ros-controllers \
+    ros-noetic-transmission-interface \
+    ros-noetic-joint-limits-interface \
+    ros-noetic-combined-robot-hw && \
+    rm -rf /var/lib/apt/lists/
+    
+ # Create an overlay Catkin workspace
+RUN source /opt/ros/noetic/setup.bash \
+ && mkdir -p /catkin_ros1_ws/src \
+ && cd /catkin_ros1_ws \ 
+ && catkin_init_workspace
+# COPY ./iiwa-ros-imitation-learning/ /catkin_ros1_ws/src/iiwa-ros-imitation-learning/
+COPY ./iiwa-ros-imitation-learning/cor_tud_msgs /catkin_ros1_ws/src/iiwa-ros-imitation-learning/cor_tud_msgs/
+COPY ./iiwa-ros-imitation-learning/iiwa_description /catkin_ros1_ws/src/iiwa-ros-imitation-learning/iiwa_description/
+COPY ./iiwa-ros-imitation-learning/iiwa_gazebo /catkin_ros1_ws/src/iiwa-ros-imitation-learning/iiwa_gazebo/
+COPY ./iiwa-ros-imitation-learning/iiwa_tools /catkin_ros1_ws/src/iiwa-ros-imitation-learning/iiwa_tools/
+COPY ./iiwa-ros-imitation-learning/iiwa_driver /catkin_ros1_ws/src/iiwa-ros-imitation-learning/iiwa_driver/
+COPY ./iiwa-ros-imitation-learning/iiwa_moveit /catkin_ros1_ws/src/iiwa-ros-imitation-learning/iiwa_moveit/
+
+COPY ./qbdevice-ros/ /catkin_ros1_ws/src/qbdevice-ros/
+COPY ./qbhand-ros/ /catkin_ros1_ws/src/qbhand-ros/
+RUN source /opt/ros/noetic/setup.bash \
+ && cd /catkin_ros1_ws \
+ && catkin build
+ 
+ 
+# rosbag to csv stuff
+WORKDIR /catkin_ros1_ws/src
+RUN git clone https://github.com/AtsushiSakai/rosbag_to_csv.git  
+WORKDIR /catkin_ros1_ws
+RUN catkin build
+
+
+COPY ./kuka_cor_dependencies/relaxed_ik_ros1/ /catkin_ros1_ws/src/relaxed_ik_ros1/
+# build ranged IK
+RUN apt-get update && apt-get install -y curl
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+# Set the PATH to include the cargo bin directory
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+WORKDIR /catkin_ros1_ws/src/relaxed_ik_ros1/relaxed_ik_core
+RUN cargo build  
+ 
+COPY ./iiwa-ros-imitation-learning/cor_tud_controllers /catkin_ros1_ws/src/iiwa-ros-imitation-learning/cor_tud_controllers
+RUN source /opt/ros/noetic/setup.bash \
+ && cd /catkin_ros1_ws \
+ && catkin build
+ 
+ # Set default work directory (or adjust to your preference)
+WORKDIR /catkin_ros1_ws
+RUN source devel/setup.bash
+RUN echo "source /catkin_ros1_ws/devel/setup.bash" >> ~/.bashrc
+
+# connect to real kuka robot
+RUN export ROS_MASTER_URI=http://192.180.1.5:30202
+RUN export ROS_IP=192.180.1.15
+# Optional: Define the default command to execute when container starts (you can adjust or omit this)
+CMD ["bash"]
+

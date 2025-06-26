@@ -17,3 +17,12 @@ kuka_cor_docker/
 ## Set up the dependencies
 
 bash setup_dependencies.sh
+
+
+## Build the dockers
+
+1. build nvidia_ros
+
+sudo docker build -t nvidia_ros:latest -f dockerfile_nvidia_ros .
+
+2.
