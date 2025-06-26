@@ -31,6 +31,17 @@ cd corrade && git checkout 0d149ee9f26a6e35c30b1b44f281b272397842f5 && cd ..
 echo "Cloning robot_controllers..."
 git clone https://github.com/epfl-lasa/robot_controllers.git || true
 
+echo "Cloning relaxed_ik..."
+git clone https://github.com/uwgraphics/relaxed_ik_ros1.git || true
+cd relaxed_ik_ros1 && git submodule update --init --recursive && cd ..
+
+echo "Cloning qbhand..."
+git clone https://github.com/ros-o/qbhand-ros.git || true
+git clone https://bitbucket.org/qbrobotics/qbdevice-ros.git || true
+
+# echo "Cloning robotics-toolbox-python..."
+git clone https://github.com/petercorke/robotics-toolbox-python.git
+
 # Optional: if you meant to clone this instead of 'robotics-toolbox-python'
 # echo "Cloning robotics-toolbox-python..."
 # git clone https://github.com/petercorke/robotics-toolbox-python.git

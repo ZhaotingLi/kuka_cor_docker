@@ -12,6 +12,7 @@ RUN source /opt/ros/noetic/setup.bash
 COPY ./kuka_cor_dependencies /kuka_cor_dependencies
 
 # Build and install kuka_fri
+RUN apt-get update && apt-get install -y python-is-python3
 WORKDIR /kuka_cor_dependencies/kuka_fri
 RUN ./waf configure && \
     ./waf && \
@@ -109,8 +110,8 @@ COPY ./iiwa-ros-imitation-learning/iiwa_tools /catkin_ros1_ws/src/iiwa-ros-imita
 COPY ./iiwa-ros-imitation-learning/iiwa_driver /catkin_ros1_ws/src/iiwa-ros-imitation-learning/iiwa_driver/
 COPY ./iiwa-ros-imitation-learning/iiwa_moveit /catkin_ros1_ws/src/iiwa-ros-imitation-learning/iiwa_moveit/
 
-COPY ./qbdevice-ros/ /catkin_ros1_ws/src/qbdevice-ros/
-COPY ./qbhand-ros/ /catkin_ros1_ws/src/qbhand-ros/
+COPY ./kuka_cor_dependencies/qbdevice-ros/ /catkin_ros1_ws/src/qbdevice-ros/
+COPY ./kuka_cor_dependencies/qbhand-ros/ /catkin_ros1_ws/src/qbhand-ros/
 RUN source /opt/ros/noetic/setup.bash \
  && cd /catkin_ros1_ws \
  && catkin build
