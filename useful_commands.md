@@ -1,6 +1,32 @@
 ############### !!! IMPORTANT !!! #####################
 robot name should be correct!! 7 or 14
 
+
+### Steps 
+
+1.connect the wires, start robot, lab computer  
+
+1.0 Check the network setting in the lab computer[kuka_lab]: D-Link -> kuka (lower port)  
+
+1.1 Run bringup_remote on the lab computer  
+
+2.start a terminal on my own pc, kill existing spacemouse program  
+
+3.use ping to check connections  
+
+4.Start Docker terminals. Source the ros master with docker.  
+
+4.1 Check the ros connection in docker terminal, use rostopic list  
+
+5.Run kuka python controller (local) roslaunch cor_tud_controllers bringup_local.launch model:=14  
+
+6.Run spacemouse launch file spacenavd -v -d & roslaunch spacenav_node classic.launch  
+
+6.1 Check the ros connection in lab computer terminal, use rostopic list 
+[May 06] 6.2 also check the output of spacemouse, sometimes it may output non-zero commands even not touched. This issue can be solved by unplug the usb cable and plugging again. 
+
+7.Run kuka programs 
+
 ### ros master
 
 source /catkin_ros1_ws/devel/setup.bash 
