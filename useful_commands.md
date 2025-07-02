@@ -51,7 +51,10 @@ sudo docker run -it --net=host --env="NVIDIA_DRIVER_CAPABILITIES=all" --env="DIS
 
 sudo docker run -it --net=host --env="NVIDIA_DRIVER_CAPABILITIES=all" --env="DISPLAY" --env="QT_X11_NO_MITSHM=1" --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" --device=/dev/input/event21 --device=/dev/input/js0 kuka_robot_refactor:v1 bash 
 
-python main-kuka-6dEE_softH.py
+#### Docker run with entire dev access (for realsense cameras)
+sudo docker run -it --net=host --env="NVIDIA_DRIVER_CAPABILITIES=all" --env="DISPLAY" --env="QT_X11_NO_MITSHM=1" --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" --privileged -v /dev:/dev kuka_robot_refactor:v1 bash
+
+
 
 ### Docker build ros 
 cd /home/zhaoting/ros_docker_packages/kuka_iiwa_ros
@@ -69,10 +72,12 @@ sudo docker build -t bd-coach-image -f dockerfile_bd_coach .
 xhost +local:docker
 sudo docker run -it --net=host --env="NVIDIA_DRIVER_CAPABILITIES=all" --env="DISPLAY" --env="QT_X11_NO_MITSHM=1" --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" --device=/dev/input/event21 --device=/dev/input/js0 bd-coach-image bash 
 
-python main-kuka.py --config-file kuka_low-dim_HGDagger
+conda run -n conda-env-CLIC --no-capture-output python main-receding_horizon_new_config.py --config-name train_CLIC_Diffusion_image_Ta8 
 
 ### Docker run BD-COACH with GPU
 sudo docker run -it --gpus=all --net=host --env="NVIDIA_DRIVER_CAPABILITIES=all" --env="DISPLAY" --env="QT_X11_NO_MITSHM=1" --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" --device=/dev/input/event8 --device=/dev/input/js0 bd-coach-image bash 
+
+sudo docker run -it --gpus=all --net=host --env="NVIDIA_DRIVER_CAPABILITIES=all" --env="DISPLAY" --env="QT_X11_NO_MITSHM=1" --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw"  bd-coach-image bash
 
 ### launch real robot 
 roslaunch cor_tud_controllers bringup.launch robot_name:=iiwa model:=7 controller:=TorqueController # old
@@ -88,6 +93,10 @@ ls -l /dev/input/by-id/
 sudo lsof /dev/input/event23
  spacenavd -v -d &
  roslaunch spacenav_node classic.launch
+
+
+### Realsense cameras
+roslaunch realsense2_camera rs_multiple_devices.launch serial_no_camera1:=317222075615 serial_no_camera2:=336222073305 
  
 ### qb hand 
 For docker to access it: --device=/dev/ttyUSB0 

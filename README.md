@@ -31,3 +31,16 @@ sudo docker build -t turtlebot3_base:latest -f dockerfile_tb3_base .
 
 3. build kuka
 
+sudo docker build -t kuka_robot_refactor:v1 -f dockerfile_kuka_cor_dependencies .
+
+
+## Build the dockerfile of CLIC
+dependencies: nvidia Container Toolkit. Otherwise, you will see the following errors: 'docker: Error response from daemon: could not select device driver "" with capabilities: [[gpu]]'
+
+Follow https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html, install the NVIDIA Container Toolkit. Then run 'sudo systemctl restart docker' to restart the docker and apply the changes. 
+
+After that, go the the CLIC project folder and build the docker:
+
+cd /home/zhaoting/TUD_Projects/BD-COACH/Files
+sudo docker build -t bd-coach-image -f dockerfile_bd_coach .
+

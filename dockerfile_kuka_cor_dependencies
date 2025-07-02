@@ -88,6 +88,8 @@ RUN apt-get update && apt-get install -y \
 
 # optitrack    
 RUN apt-get update && apt-get install -y ros-noetic-vrpn-client-ros
+# realsense
+RUN apt-get update && apt-get install -y ros-noetic-realsense2-camera 
 
 # qbhand dempendencies
 RUN apt-get update && apt-get install -y \
