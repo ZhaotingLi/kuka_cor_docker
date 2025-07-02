@@ -128,7 +128,8 @@ RUN catkin build
 
 COPY ./kuka_cor_dependencies/relaxed_ik_ros1/ /catkin_ros1_ws/src/relaxed_ik_ros1/
 # build ranged IK
-RUN apt-get update && apt-get install -y curl
+RUN apt-get update --fix-missing && apt-get install -y curl
+#RUN apt-get update && apt-get install -y curl
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 # Set the PATH to include the cargo bin directory
 ENV PATH="/root/.cargo/bin:${PATH}"

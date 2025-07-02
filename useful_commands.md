@@ -74,6 +74,8 @@ sudo docker run -it --net=host --env="NVIDIA_DRIVER_CAPABILITIES=all" --env="DIS
 
 conda run -n conda-env-CLIC --no-capture-output python main-receding_horizon_new_config.py --config-name train_CLIC_Diffusion_image_Ta8 
 
+conda run -n conda-env-CLIC --no-capture-output python main-kuka-cleaned.py --config-name train_CLIC_Diffusion_image_Ta1
+
 conda run -n conda-env-CLIC --no-capture-output python env/realsense_Image_receiver.py
 
 ### Docker run BD-COACH with GPU
@@ -108,8 +110,17 @@ roslaunch qb_hand_control control_qbhand.launch standalone:=true activate_on_ini
 sudo docker ps
 sudo docker cp cdb38dda8c08:app/saved_data/kuka-push-BD-COACH-1027-1505  /home/zhaoting/Documents 
 
+sudo docker cp af853bc7d86a:/catkin_ros1_ws/src/relaxed_ik_ros1/relaxed_ik_core/trajectory_buffer_0.pkl ~/outputs/
+
+
 sudo docker cp b870b092a521:/catkin_ros1_ws/src/relaxed_ik_ros1/relaxed_ik_core/saved_data/ /home/zhaoting/Documents/kuka_box_0411
 sudo docker cp b870b092a521:/catkin_ros1_ws/src/relaxed_ik_ros1/relaxed_ik_core/results/ /home/zhaoting/Documents/results
+
+#### locate files location in a container
+sudo docker exec -it af853bc7d86a find / -type f -name "trajectory_buffe*" 2>/dev/null
+
+####  fix permissions of the copied folders 
+sudo chown -R $(whoami):$(whoami) outputs/
 
 ### Delete non-used docker images
 sudo docker container prune 
