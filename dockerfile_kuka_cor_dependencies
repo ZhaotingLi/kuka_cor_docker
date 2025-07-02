@@ -135,7 +135,9 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 
 WORKDIR /catkin_ros1_ws/src/relaxed_ik_ros1/relaxed_ik_core
 RUN cargo build  
- 
+COPY ./iiwa-ros-imitation-learning/cor_tud_controllers/urdf/matlab_iiwa7.urdf /catkin_ros1_ws/src/relaxed_ik_ros1/relaxed_ik_core/configs/urdfs/
+COPY ./iiwa-ros-imitation-learning/cor_tud_controllers/urdf/matlab_iiwa14.urdf /catkin_ros1_ws/src/relaxed_ik_ros1/relaxed_ik_core/configs/urdfs/
+
 COPY ./iiwa-ros-imitation-learning/cor_tud_controllers /catkin_ros1_ws/src/iiwa-ros-imitation-learning/cor_tud_controllers
 RUN source /opt/ros/noetic/setup.bash \
  && cd /catkin_ros1_ws \

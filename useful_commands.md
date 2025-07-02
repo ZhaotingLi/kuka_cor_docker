@@ -74,6 +74,8 @@ sudo docker run -it --net=host --env="NVIDIA_DRIVER_CAPABILITIES=all" --env="DIS
 
 conda run -n conda-env-CLIC --no-capture-output python main-receding_horizon_new_config.py --config-name train_CLIC_Diffusion_image_Ta8 
 
+conda run -n conda-env-CLIC --no-capture-output python env/realsense_Image_receiver.py
+
 ### Docker run BD-COACH with GPU
 sudo docker run -it --gpus=all --net=host --env="NVIDIA_DRIVER_CAPABILITIES=all" --env="DISPLAY" --env="QT_X11_NO_MITSHM=1" --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" --device=/dev/input/event8 --device=/dev/input/js0 bd-coach-image bash 
 
@@ -91,8 +93,8 @@ roslaunch cor_tud_controllers bringup_remote.launch model:=14 simulation:=true
 ### space mouse
 ls -l /dev/input/by-id/
 sudo lsof /dev/input/event23
- spacenavd -v -d &
- roslaunch spacenav_node classic.launch
+spacenavd -v -d &
+roslaunch spacenav_node classic.launch
 
 
 ### Realsense cameras

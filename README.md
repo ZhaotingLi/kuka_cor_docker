@@ -18,6 +18,13 @@ kuka_cor_docker/
 
 bash setup_dependencies.sh
 
+## Clone kuka_ros
+
+git clone git@gitlab.tudelft.nl:kuka-iiwa-7-cor-lab/iiwa-ros-imitation-learning.git
+cd iiwa-ros-imitation-learning/
+git checkout e41c8e6fa8fec8b973012b9ffb8224eaa8d14a9c  # the latest version has conflicts with our code and 500HZ control in kuka
+
+
 
 ## Build the dockers
 
