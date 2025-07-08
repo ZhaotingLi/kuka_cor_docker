@@ -33,7 +33,8 @@ source /catkin_ros1_ws/devel/setup.bash
 export ROS_MASTER_URI=http://192.180.1.5:30202 
 export ROS_IP=192.180.1.15
 
- 
+conda run -n conda-env-CLIC --no-capture-output python main-kuka-cleaned.py --config-name train_CLIC_Diffusion_image_Ta1
+
 ### Run KUKA python controller
 roslaunch cor_tud_controllers bringup_remote.launch model:=7 # for lab computer
 roslaunch cor_tud_controllers bringup_local.launch model:=14 # for your pc
@@ -52,9 +53,10 @@ sudo docker run -it --net=host --env="NVIDIA_DRIVER_CAPABILITIES=all" --env="DIS
 sudo docker run -it --net=host --env="NVIDIA_DRIVER_CAPABILITIES=all" --env="DISPLAY" --env="QT_X11_NO_MITSHM=1" --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" --device=/dev/input/event21 --device=/dev/input/js0 kuka_robot_refactor:v1 bash 
 
 #### Docker run with entire dev access (for realsense cameras)
-sudo docker run -it --net=host --env="NVIDIA_DRIVER_CAPABILITIES=all" --env="DISPLAY" --env="QT_X11_NO_MITSHM=1" --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" --privileged -v /dev:/dev kuka_robot_refactor:v1 bash
+sudo docker run -it --net=host --env="QT_X11_NO_MITSHM=1" --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" --privileged -v /dev:/dev kuka_robot_refactor:v1 bash
 
-
+##### use this one to avoid stuck issue caused by two realsense cameras
+sudo docker run -it --rm   --net=host   -e DISPLAY=$DISPLAY   -e QT_X11_NO_MITSHM=1   -v /tmp/.X11-unix:/tmp/.X11-unix:rw   -v /dev/bus/usb:/dev/bus/usb:rw   --group-add video   kuka_robot_refactor:v1   bash
 
 ### Docker build ros 
 cd /home/zhaoting/ros_docker_packages/kuka_iiwa_ros
@@ -110,7 +112,7 @@ roslaunch qb_hand_control control_qbhand.launch standalone:=true activate_on_ini
 sudo docker ps
 sudo docker cp cdb38dda8c08:app/saved_data/kuka-push-BD-COACH-1027-1505  /home/zhaoting/Documents 
 
-sudo docker cp af853bc7d86a:/catkin_ros1_ws/src/relaxed_ik_ros1/relaxed_ik_core/trajectory_buffer_0.pkl ~/outputs/
+sudo docker cp 26ddae91e845:/catkin_ros1_ws/src/relaxed_ik_ros1/relaxed_ik_core/trajectory_buffer_0.hdf5 ~/outputs/
 
 
 sudo docker cp b870b092a521:/catkin_ros1_ws/src/relaxed_ik_ros1/relaxed_ik_core/saved_data/ /home/zhaoting/Documents/kuka_box_0411
