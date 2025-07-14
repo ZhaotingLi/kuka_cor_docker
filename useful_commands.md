@@ -15,7 +15,7 @@ robot name should be correct!! 7 or 14
 3.use ping to check connections  
 
 4.Start Docker terminals. Source the ros master with docker.  
-
+  
 4.1 Check the ros connection in docker terminal, use rostopic list  
 
 5.Run kuka python controller (local) roslaunch cor_tud_controllers bringup_local.launch model:=14  
@@ -33,7 +33,11 @@ source /catkin_ros1_ws/devel/setup.bash
 export ROS_MASTER_URI=http://192.180.1.5:30202 
 export ROS_IP=192.180.1.15
 
+conda run -n conda-env-CLIC --no-capture-output python main-kuka-cleaned.py --config-name train_IBC_image_Ta1
+
 conda run -n conda-env-CLIC --no-capture-output python main-kuka-cleaned.py --config-name train_CLIC_Diffusion_image_Ta1
+
+
 
 ### Run KUKA python controller
 roslaunch cor_tud_controllers bringup_remote.launch model:=7 # for lab computer
@@ -50,7 +54,7 @@ sudo docker run -it --net=host --env="NVIDIA_DRIVER_CAPABILITIES=all" --env="DIS
 
 sudo docker run -it --net=host --env="NVIDIA_DRIVER_CAPABILITIES=all" --env="DISPLAY" --env="QT_X11_NO_MITSHM=1" --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw"  --device=/dev/ttyUSB0  kuka_robot_refactor:v1 bash 
 
-sudo docker run -it --net=host --env="NVIDIA_DRIVER_CAPABILITIES=all" --env="DISPLAY" --env="QT_X11_NO_MITSHM=1" --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" --device=/dev/input/event21 --device=/dev/input/js0 kuka_robot_refactor:v1 bash 
+sudo docker run -it --net=host --env="NVIDIA_DRIVER_CAPABILITIES=all" --env="DISPLAY" --env="QT_X11_NO_MITSHM=1" --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" --device=/dev/input/event8 --device=/dev/input/js0 kuka_robot_refactor:v1 bash 
 
 #### Docker run with entire dev access (for realsense cameras)
 sudo docker run -it --net=host --env="QT_X11_NO_MITSHM=1" --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" --privileged -v /dev:/dev kuka_robot_refactor:v1 bash
@@ -112,14 +116,14 @@ roslaunch qb_hand_control control_qbhand.launch standalone:=true activate_on_ini
 sudo docker ps
 sudo docker cp cdb38dda8c08:app/saved_data/kuka-push-BD-COACH-1027-1505  /home/zhaoting/Documents 
 
-sudo docker cp 26ddae91e845:/catkin_ros1_ws/src/relaxed_ik_ros1/relaxed_ik_core/trajectory_buffer_0.hdf5 ~/outputs/
+sudo docker cp caef08815862:/catkin_ros1_ws/src/relaxed_ik_ros1/relaxed_ik_core/trajectory_buffer_0.hdf5 ~/outputs/
 
 
 sudo docker cp b870b092a521:/catkin_ros1_ws/src/relaxed_ik_ros1/relaxed_ik_core/saved_data/ /home/zhaoting/Documents/kuka_box_0411
 sudo docker cp b870b092a521:/catkin_ros1_ws/src/relaxed_ik_ros1/relaxed_ik_core/results/ /home/zhaoting/Documents/results
 
 #### locate files location in a container
-sudo docker exec -it af853bc7d86a find / -type f -name "trajectory_buffe*" 2>/dev/null
+sudo docker exec -it caef08815862 find / -type f -name "trajectory_buffe*" 2>/dev/null
 
 ####  fix permissions of the copied folders 
 sudo chown -R $(whoami):$(whoami) outputs/
