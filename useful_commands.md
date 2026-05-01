@@ -4,28 +4,55 @@ robot name should be correct!! 7 or 14
 
 ### Steps 
 
-1.connect the wires, start robot, lab computer  
+1.connect the wires, start robot controller, and the lab computer  
 
 1.0 Check the network setting in the lab computer[kuka_lab]: D-Link -> kuka (lower port)  
 
 1.1 Run bringup_remote on the lab computer  
 
-2.start a terminal on my own pc, kill existing spacemouse program  
+```bash
+roslaunch cor_tud_controllers bringup_remote.launch model:=14 
+```
+
+2.start a terminal on your own pc, kill existing spacemouse program  
 
 3.use ping to check connections  
+```bash
+ping 192.180.1.14  ## ip of the kuka 14
+ping 192.180.1.5    ## ip of the lab computer
+```
+
 
 4.Start Docker terminals. Source the ros master with docker.  
-  
+Note: The IP address assigned to the Ethernet interface decides the values for ROS_IP and ROS_HOSTNAME inside the Docker containers. your pc's Ethernet IP should be set to '192.180.1.15'.
+
+```bash
+source /catkin_ros1_ws/devel/setup.bash 
+export ROS_MASTER_URI=http://192.180.1.5:30202 
+export ROS_IP=192.180.1.15
+```
+
 4.1 Check the ros connection in docker terminal, use rostopic list  
 
-5.Run kuka python controller (local) roslaunch cor_tud_controllers bringup_local.launch model:=14  
+5.Run kuka python controller (local) 
+```bash
+roslaunch cor_tud_controllers bringup_local.launch model:=14  
+```
 
-6.Run spacemouse launch file spacenavd -v -d & roslaunch spacenav_node classic.launch  
+6[optional].Run spacemouse launch file 
+```bash
+spacenavd -v -d & roslaunch spacenav_node classic.launch  
+```
 
 6.1 Check the ros connection in lab computer terminal, use rostopic list 
-[May 06] 6.2 also check the output of spacemouse, sometimes it may output non-zero commands even not touched. This issue can be solved by unplug the usb cable and plugging again. 
+6.2 also check the output of spacemouse, sometimes it may output non-zero commands even not touched. This issue can be solved by unplug the usb cable and plugging again. 
 
 7.Run kuka programs 
+
+One example is
+```bash
+python3 /catkin_ros1_ws/src/iiwa-ros-imitation-learning/cor_tud_controllers/python/request_joint_position.py iiwa14
+```
 
 ### ros master
 

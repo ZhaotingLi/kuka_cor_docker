@@ -83,7 +83,7 @@ sudo docker build -t kuka_robot_refactor:v1 -f dockerfile_kuka_cor_dependencies 
 
 ## Next step:
 
-Once the image is built successfully, you could follow this doc to control the robot.
+Once the image is built successfully, follow the steps in [useful_commands.md](useful_commands.md) to control the robot.
 
 
 
